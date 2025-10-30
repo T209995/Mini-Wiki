@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Wiki</title>
+    <!-- Style CSS (identique pour uniformité) -->
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4a4a4a;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .actions {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .revision-list {
+            list-style: none;
+            padding: 0;
+        }
+        .revision-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .revision-item:last-child {
+            border-bottom: none;
+        }
+        .revision-info {
+            font-size: 1em;
+        }
+        .revision-timestamp {
+            color: #555;
+            font-size: 0.9em;
+        }
+        .revision-link a {
+            color: #007bff;
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+        }
+        .revision-link a:hover {
+            background-color: #e9f5ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Lien pour revenir à la page actuelle -->
+        <div class="actions">
+            <a href="{{ url_for('view_page', slug=page.slug) }}">← Retourner à la page actuelle</a>
+        </div>
+
+        <h1>Historique des versions pour : {{ page.title }}</h1>
+        
+        <ul class="revision-list">
+            <!-- La boucle inclut toutes les révisions enregistrées -->
+            {% for revision in revisions %}
+                <li class="revision-item">
+                    <div class="revision-info">
+                        Révision n° **{{ revision.id }}**
+                        <div class="revision-timestamp">
+                            Enregistrée le : {{ revision.timestamp.strftime('%Y-%m-%d à %H:%M:%S') }}
+                        </div>
+                    </div>
+                    <div class="revision-link">
+                        <a href="{{ url_for('view_revision', slug=page.slug, revision_id=revision.id) }}">Voir cette version</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Remarque sur la version actuelle -->
+        <p style="margin-top: 30px; font-style: italic;">
+            La version actuelle de la page n'est pas listée ici, car elle se trouve dans le champ `content` de la table `Page`. Chaque modification enregistre l'ancien contenu avant de le remplacer.
+        </p>
+
+    </div>
+</body>
+</html>
+

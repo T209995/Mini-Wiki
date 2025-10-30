@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Le titre est passé dynamiquement depuis app.py -->
+    <title>{{ title }}</title>
+    <!-- Tu ajouteras ici le CSS léger plus tard -->
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4a4a4a;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .nav-actions {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+        .search-form input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .search-form button {
+            padding: 8px 12px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .search-form button:hover {
+            background-color: #4cae4c;
+        }
+        .note-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .note-item:last-child {
+            border-bottom: none;
+        }
+        .note-item a {
+            font-weight: bold;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 1.1em;
+        }
+        .note-item a:hover {
+            text-decoration: underline;
+        }
+        .note-metadata {
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 5px;
+        }
+        .empty-state {
+            padding: 30px;
+            background-color: #f9f9f9;
+            text-align: center;
+            border-radius: 4px;
+            color: #555;
+        }
+        .search-info {
+            font-style: italic;
+            margin-bottom: 15px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Affichage du titre passé dynamiquement -->
+        <h1>{{ title }}</h1>
+        
+        <div class="nav-actions">
+            <!-- Lien vers la nouvelle route de création -->
+            <a href="{{ url_for('create_page') }}">✍️ Créer une nouvelle note</a>
+
+            <!-- FORMULAIRE DE RECHERCHE -->
+            <form action="{{ url_for('search') }}" method="GET" class="search-form">
+                <!-- 'q' est le nom du paramètre dans l'URL (ex: /search?q=terme) -->
+                <input type="text" name="q" placeholder="Rechercher..." value="{{ query or '' }}">
+                <button type="submit">🔍</button>
+            </form>
+        </div>
+
+        <!-- Section pour afficher l'information de recherche -->
+        {% if query is not none and query != '' %}
+            <p class="search-info">
+                {% if pages|length > 0 %}
+                    {{ pages|length }} résultat(s) trouvé(s) pour le terme : **{{ query }}**.
+                {% else %}
+                    Aucun résultat trouvé pour le terme : **{{ query }}**.
+                {% endif %}
+            </p>
+            {% if pages|length > 0 %}
+                <h2>Notes correspondantes :</h2>
+            {% endif %}
+        {% else %}
+            <!-- Titre pour la liste normale de toutes les notes -->
+            <h2>Notes enregistrées ({{ pages|length }}) :</h2>
+        {% endif %}
+
+        {% if pages %}
+            <ul>
+                <!-- Boucle sur la liste des pages récupérées dans app.py -->
+                {% for page in pages %}
+                    <li class="note-item">
+                        <!-- Le lien utilise le 'slug' pour diriger vers la page -->
+                        <a href="{{ url_for('view_page', slug=page.slug) }}">{{ page.title }}</a>
+                        <div class="note-metadata">
+                            Modifié le: {{ page.updated_at.strftime('%Y-%m-%d %H:%M') }}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% elif query is none or query == '' %}
+            <!-- Afficher le message 'empty-state' uniquement si AUCUNE recherche n'est en cours -->
+            <div class="empty-state">
+                <p>Aucune note trouvée. Commence par <a href="{{ url_for('create_page') }}">créer ta première note</a> !</p>
+            </div>
+        {% endif %}
+
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Affichage d'un titre spécial si c'est une révision -->
+    <title>{{ title }} - Wiki</title>
+    <!-- Style CSS (identique pour uniformité) -->
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4a4a4a;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .metadata {
+            font-size: 0.9em;
+            color: #777;
+            margin-bottom: 20px;
+        }
+        /* Styles pour le contenu Markdown converti */
+        .content h2 {
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        .content pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .content ul, .content ol {
+            padding-left: 20px;
+        }
+        .content blockquote {
+            border-left: 5px solid #ccc;
+            padding-left: 15px;
+            color: #555;
+            margin: 10px 0;
+        }
+        .actions {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            /* Flex pour aligner les boutons/liens sur la même ligne */
+            display: flex; 
+            align-items: center;
+            gap: 15px; /* Espace entre les éléments */
+        }
+        .actions a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .delete-button {
+            background: none;
+            border: none;
+            color: #dc3545; /* Rouge pour la suppression */
+            cursor: pointer;
+            padding: 0;
+            font-size: 1em;
+            text-decoration: underline;
+        }
+        .delete-button:hover {
+            color: #a71d2a;
+        }
+        /* Style spécifique pour la bannière de révision */
+        .revision-banner {
+            background-color: #ffffe0;
+            border: 1px solid #e6db55;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="actions">
+            <a href="{{ url_for('index') }}">← Retour à la liste</a>
+            
+            <!-- Affichage du bouton "Éditer" seulement si ce n'est PAS une ancienne révision -->
+            {% if not is_revision %}
+                <a href="{{ url_for('edit_page', slug=page.slug) }}">✏️ Éditer cette note</a>
+
+                <!-- NOUVEAU LIEN VERS L'HISTORIQUE DES VERSIONS -->
+                <a href="{{ url_for('view_history', slug=page.slug) }}">
+                    🕰️ Historique ({{ revision_count }})
+                </a>
+
+                <!-- FORMULAIRE DE SUPPRESSION -->
+                <form id="delete-form" method="POST" action="{{ url_for('delete_page', slug=page.slug) }}" style="display: inline;">
+                    <button type="submit" class="delete-button" onclick="return confirmDeletion(event)">
+                        🗑️ Supprimer cette note
+                    </button>
+                </form>
+            {% else %}
+                <!-- Si nous sommes sur une révision, proposer de revenir à l'historique -->
+                <a href="{{ url_for('view_history', slug=page.slug) }}">← Revenir à l'historique</a>
+            {% endif %}
+        </div>
+        
+        <!-- BANNIÈRE SI C'EST UNE RÉVISION -->
+        {% if is_revision %}
+            <div class="revision-banner">
+                Vous consultez l'ancienne révision n°{{ revision_id }} enregistrée le {{ current_revision.timestamp.strftime('%Y-%m-%d à %H:%M:%S') }}.
+            </div>
+        {% endif %}
+
+        <h1>{{ page.title }}</h1>
+        <div class="metadata">
+            {% if not is_revision %}
+                Créé le: {{ page.created_at.strftime('%Y-%m-%d %H:%M') }} | 
+                Modifié le: {{ page.updated_at.strftime('%Y-%m-%d %H:%M') }}
+            {% else %}
+                (Version de l'historique)
+            {% endif %}
+        </div>
+        
+        <div class="content">
+            <!-- Affichage du contenu Markdown converti en HTML -->
+            {{ html_content | safe }}
+        </div>
+    </div>
+
+    <!-- Script de confirmation de suppression -->
+    <script>
+        // Fonction appelée par le bouton de suppression
+        function confirmDeletion(event) {
+            // Empêche la soumission du formulaire immédiatement
+            event.preventDefault(); 
+            
+            // Affiche une boîte de dialogue de confirmation
+            if (window.confirm("Êtes-vous sûr de vouloir supprimer cette note ? Cette action est irréversible.")) {
+                // Si l'utilisateur confirme, soumet le formulaire
+                document.getElementById('delete-form').submit();
+            }
+        }
+    </script>
+</body>
+</html>
+
