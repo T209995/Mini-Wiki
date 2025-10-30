@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <!-- Style CSS (identique pour uniformité) -->
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4a4a4a;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; 
+            font-size: 16px;
+        }
+        textarea {
+            height: 300px;
+            font-family: monospace;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .back-link {
+            display: block;
+            margin-top: 10px;
+            text-decoration: none;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ title }}</h1>
+
+        <!-- Le formulaire envoie les données à la route d'édition si 'page' existe, sinon à la route de création -->
+        <form method="POST" action="{{ url_for('edit_page', slug=page.slug) if page else url_for('create_page') }}">
+            <label for="title">Titre de la Note :</label>
+            <input type="text" id="title" name="title" required value="{{ page.title if page else '' }}">
+
+            <label for="content">Contenu (Markdown) :</label>
+            <!-- L'attribut name="content" est crucial pour récupérer le contenu dans app.py -->
+            <textarea id="content" name="content" required>{{ page.content if page else '' }}</textarea>
+
+            <button type="submit">{{ 'Mettre à jour la Note' if page else 'Sauvegarder la Note' }}</button>
+        </form>
+
+        <a class="back-link" href="{{ url_for('index') }}">← Retour à la liste</a>
+        {% if page %}
+            <a class="back-link" href="{{ url_for('view_page', slug=page.slug) }}">← Annuler et Revenir à la page</a>
+        {% endif %}
+    </div>
+</body>
+</html>
